@@ -236,9 +236,7 @@ function applyBackgroundBlur(imageData, confidenceMasks) {
   const iterations = 3; // Adjust the number of iterations as needed.
 
   if (isSafari()) {
-    bgCanvas.style.filter = `blur(${blurRadius}px)`;
-    bgCanvas.style.webkitFilter = `blur(${blurRadius}px)`;
-    bgCanvasCtx.drawImage(bgCanvas, 0, 0);
+    StackBlur.canvasRGBA(bgCanvas, 0, 0, width, height, blurRadius);
   } else {
     // Apply an alternative filter (e.g., CSS blur) for other browsers.
     for (let i = 0; i < iterations; i++) {
