@@ -1,22 +1,19 @@
 import vision from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.2";
 const { ImageSegmenter, SegmentationMask, FilesetResolver } = vision;
-
 const videoElement = document.getElementById('video');
 const canvas = document.getElementById('canvas');
-
 const startBtn = document.getElementById('start-btn');
 const stopBtn = document.getElementById('stop-btn');
 const blurBtn = document.getElementById('blur-btn');
 const unblurBtn = document.getElementById('unblur-btn');
-let runningMode = "VIDEO";
-
 const outputCanvasCtx = canvas.getContext('2d');
 const fpsTextElement = document.getElementById("fpsText");
-const bgCanvas = document.createElement("canvas");
+const bgCanvas = document.getElementById('canvas');
 const bgCanvasCtx = bgCanvas.getContext("2d");
 // Define the range of confidence score for background blur effect.
 let minConfidence = 0.4;
 let imageSegmenter;
+let runningMode = "VIDEO";
 
 startBtn.addEventListener('click', e => {
   startBtn.disabled = true;
@@ -238,13 +235,25 @@ function applyBackgroundBlur(imageData, confidenceMasks) {
   const blurRadius = 10; // Adjust the blur radius as needed.
   const iterations = 3; // Adjust the number of iterations as needed.
 
-  for (let i = 0; i < iterations; i++) {
-    bgCanvasCtx.filter = `blur(${blurRadius}px)`;
+  if (isSafari()) {
+    bgCanvas.style.filter = `blur(${blurRadius}px)`;
+    bgCanvas.style.webkitFilter = `blur(${blurRadius}px)`;
     bgCanvasCtx.drawImage(bgCanvas, 0, 0);
+  } else {
+    // Apply an alternative filter (e.g., CSS blur) for other browsers.
+    for (let i = 0; i < iterations; i++) {
+      bgCanvasCtx.filter = `blur(${blurRadius}px)`;
+      bgCanvasCtx.drawImage(bgCanvas, 0, 0);
+    }
+    bgCanvasCtx.filter = "none";
   }
-
-  bgCanvasCtx.filter = "none"; // Reset the filter to none.
-
   // Return the background-blurred image data.
   return bgCanvasCtx.getImageData(0, 0, width, height);
+}
+
+
+function isSafari() {
+  // Use user agent detection to identify Safari.
+  const ua = navigator.userAgent.toLowerCase();
+  return ua.indexOf('safari') !== -1 && ua.indexOf('chrome') === -1;
 }
